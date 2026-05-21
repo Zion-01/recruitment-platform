@@ -1,0 +1,299 @@
+:root {
+  /* The Clean SaaS Palette */
+  --text: #64748b;          /* Professional slate for readable text */
+  --text-h: #0f172a;        /* Deep, sharp slate for headings */
+  
+  --bg: #f8fafc;            /* The "Whitish" Canvas - Ultra-light slate */
+  --card-bg: #ffffff;       /* Pure white for floating content cards */
+  
+  --border: #e2e8f0;        /* Subtle crisp borders */
+  --code-bg: #f1f5f9;       /* Input backgrounds */
+  
+  --accent: #ff1e00;        /* Brightly Orange */
+  --accent-bg: rgba(255, 30, 0, 0.05);
+  --accent-border: rgba(255, 30, 0, 0.3);
+  
+  --highlight: #10b981;     /* A slightly deeper, premium green to contrast the bright canvas */
+  --highlight-bg: rgba(16, 185, 129, 0.08);
+
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.04); /* Tighter, softer shadow for the white aesthetic */
+
+  --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Updated #root to allow the full-screen layout */
+#root {
+  width: 100%;
+  margin: 0;
+  text-align: left; /* Reset from center */
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+h1, h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+
+p {
+  margin: 0;
+}
+
+code, .counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+
+/* Custom Form Stylings */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-h);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.custom-input {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  background-color: var(--code-bg);
+  color: var(--text-h);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.25s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.custom-input::placeholder {
+  color: var(--text);
+  opacity: 0.6;
+}
+
+/* The Hover & Focus interaction */
+.custom-input:hover {
+  background-color: var(--border); /* Slightly darker on hover */
+}
+
+.custom-input:focus {
+  background-color: var(--card-bg);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-bg); /* The sleek modern focus ring */
+}
+
+/* Stripping the native select arrow and replacing it with a custom SVG */
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 18px;
+  padding-right: 48px;
+  cursor: pointer;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  width: 90%;
+  max-width: 650px;
+  max-height: 85vh;
+  border-radius: 32px;
+  padding: 40px;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+}
+
+.modal-close {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-h);
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* AI Hero Animations */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(255, 30, 0, 0.4); }
+  70% { box-shadow: 0 0 0 20px rgba(255, 30, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 30, 0, 0); }
+}
+
+@keyframes staggerFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-1 { animation: staggerFadeIn 0.6s ease-out 0.1s both; }
+.animate-fade-2 { animation: staggerFadeIn 0.6s ease-out 0.3s both; }
+.animate-fade-3 { animation: staggerFadeIn 0.6s ease-out 0.5s both; }
+.animate-fade-4 { animation: staggerFadeIn 0.6s ease-out 0.7s both; }
+
+/* --- PREMIUM FORM INPUTS --- */
+.custom-input {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background-color: var(--bg);
+    color: var(--text-h);
+    font-size: 1rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Creates a microscopic "recessed" look */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02); 
+}
+
+/* Make the placeholder text look elegant */
+.custom-input::placeholder {
+    color: var(--text);
+    opacity: 0.6;
+}
+
+/* When the user hovers */
+.custom-input:hover {
+    border-color: var(--text);
+}
+
+/* THE MAGIC: When the user clicks inside */
+.custom-input:focus {
+    border-color: var(--accent);
+    background-color: var(--card-bg);
+    /* Creates a beautiful glowing ring around the input using your accent color */
+    box-shadow: 0 0 0 4px var(--accent-bg), inset 0 1px 2px rgba(0,0,0,0.01);
+}
+
+/* Custom styling specifically for the dropdown arrows */
+.custom-select {
+    cursor: pointer;
+    appearance: none; 
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='gray' stroke='gray' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+    padding-right: 2.5rem; /* Make room for the arrow */
+}
