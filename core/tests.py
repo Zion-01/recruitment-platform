@@ -333,3 +333,63 @@ class ComprehensiveProfileTests(TestCase):
         self.assertEqual(profile.projects[0]['title'], "Focus Bridge")
 
         print("✓ TC-02 Passed: Deeply nested JSON arrays securely processed and committed to native PostgreSQL database fields.")
+
+class UserAccessControlTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.alice = User.objects.create_user(username='alice', password='alicepass123')
+        self.bob = User.objects.create_user(username='bob', password='bobpass123')
+        self.staff = User.objects.create_user(username='recruiter', password='staffpass123', is_staff=True)
+
+    def test_registration_is_open(self):
+        response = self.client.post('/api/users/', {"username": "newcomer", "password": "newpass12345"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_registration_cannot_grant_staff(self):
+        response = self.client.post(
+            '/api/users/',
+            {"username": "sneaky", "password": "sneakypass123", "is_staff": True},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertFalse(User.objects.get(username='sneaky').is_staff)
+
+    def test_user_list_requires_staff(self):
+        self.assertIn(self.client.get('/api/users/').status_code,
+                      [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
+
+        self.client.force_authenticate(user=self.alice)
+        self.assertEqual(self.client.get('/api/users/').status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_authenticate(user=self.staff)
+        self.assertEqual(self.client.get('/api/users/').status_code, status.HTTP_200_OK)
+
+    def test_unauthenticated_cannot_modify_or_delete_users(self):
+        response = self.client.patch(f'/api/users/{self.alice.id}/', {"first_name": "Hacked"}, format='json')
+        self.assertIn(response.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
+
+        response = self.client.delete(f'/api/users/{self.alice.id}/')
+        self.assertIn(response.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
+        self.assertTrue(User.objects.filter(id=self.alice.id).exists())
+
+    def test_user_cannot_access_another_user(self):
+        self.client.force_authenticate(user=self.bob)
+        self.assertEqual(self.client.get(f'/api/users/{self.alice.id}/').status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            self.client.patch(f'/api/users/{self.alice.id}/', {"first_name": "Hacked"}, format='json').status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+        self.assertEqual(
+            self.client.get(f'/api/users/{self.alice.id}/recommendations/').status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+    def test_user_can_update_self_but_not_promote_self(self):
+        self.client.force_authenticate(user=self.alice)
+        response = self.client.patch(
+            f'/api/users/{self.alice.id}/', {"first_name": "Alice", "is_staff": True}, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.alice.refresh_from_db()
+        self.assertEqual(self.alice.first_name, "Alice")
+        self.assertFalse(self.alice.is_staff)
