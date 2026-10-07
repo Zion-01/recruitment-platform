@@ -12,6 +12,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import User, Job, Application, Recommendation
 from .serializers import UserSerializer, JobSerializer, ApplicationSerializer, CustomTokenObtainPairSerializer, RecommendationSerializer
 from .ml_engine import JobRecommendationEngine
+from .permissions import IsSelfOrAdmin
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -20,7 +21,16 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
 
-    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def get_permissions(self):
+        # Registration is open; listing every user is staff-only; reading or
+        # changing a specific user is limited to that user (or staff).
+        if self.action == 'create':
+            return [AllowAny()]
+        if self.action == 'list':
+            return [IsAdminUser()]
+        return [IsSelfOrAdmin()]
+
+    @action(detail=True, methods=['get'])
     def recommendations(self, request, pk=None):
         """
         Endpoint: /api/users/{id}/recommendations/
@@ -36,13 +46,14 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = RecommendationSerializer(recommendations, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'])
     def parse_resume(self, request, pk=None):
         """
         Endpoint: POST /api/users/{id}/parse_resume/
         Open-source NLP pipeline that physically reads uploaded PDFs/DOCX files, 
         extracts text, and structures it into frontend-ready JSON arrays.
         """
+        self.get_object()  # enforce IsSelfOrAdmin on the target user
         uploaded_file = request.FILES.get('file')
         if not uploaded_file:
             raise ValidationError({"detail": "No resume file attached to the request."})
